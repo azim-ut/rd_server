@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class ServerApp {
     public void start(String[] args) {
-        System.out.println("111");
         int port = 4907;
         String code = "TEST";
         new Thread(new IpUpdateRunnable(code)).start();

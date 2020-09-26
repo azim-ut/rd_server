@@ -47,7 +47,7 @@ public class IpUpdateRunnable implements Runnable {
     }
 
     private String postMyIp(String ip) throws IOException {
-        HttpPost post = new HttpPost("http://itp/charts/rest/ip");
+        HttpPost post = new HttpPost("https://it-prom.com/charts/rest/ip");
 
         String data = "{\"code\":\"" + this.code + "\", \"ip\":\"" + ip + "\"}";
         post.setEntity(new StringEntity(data, ContentType.APPLICATION_FORM_URLENCODED));
