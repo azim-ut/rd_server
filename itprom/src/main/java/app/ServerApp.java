@@ -1,6 +1,6 @@
 package app;
 
-import app.runnable.IpUpdateRunnable;
+import app.runnable.HostUpdateRunnable;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -26,7 +26,7 @@ public class ServerApp {
     public void start(String[] args) {
         int port = 4907;
         String code = "TEST";
-        new Thread(new IpUpdateRunnable(code)).start();
+        new Thread(new HostUpdateRunnable(code, port)).start();
 
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             System.out.println("Socket: " + serverSocket.toString());
