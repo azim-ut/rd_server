@@ -1,5 +1,6 @@
 package app;
 
+import app.bean.ConnectionState;
 import app.runnable.HostUpdateRunnable;
 import org.springframework.stereotype.Component;
 
@@ -24,29 +25,39 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class ServerApp {
     public void start(String[] args) {
-        int port = 4907;
-        String code = "TEST";
-        new Thread(new HostUpdateRunnable(code, port)).start();
-
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("Socket: " + serverSocket.toString());
-            while (true) {
+        ConnectionState state = ConnectionState.builder()
+                .port(4907)
+                .code("TEST")
+                .build();
+        new Thread(new HostUpdateRunnable(state)).start();
+        while (true) {
+            if(state.getIp() != null){
+                try (ServerSocket serverSocket = new ServerSocket(state.getPort(), 50, InetAddress.getByName(state.getIp()))) {
+                    System.out.println("Socket: " + serverSocket.toString());
+                    while (true) {
+                        try {
+                            Socket socket = serverSocket.accept();
+                            OutputStream out = socket.getOutputStream();
+                            PrintWriter writer = new PrintWriter(out, true);
+                            writer.println(state.getCode() + ": " + new Date().getTime());
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
                 try {
-                    Socket socket = serverSocket.accept();
-                    OutputStream out = socket.getOutputStream();
-                    PrintWriter writer = new PrintWriter(out, true);
-                    writer.println(code + ": " + new Date().getTime());
-                    Thread.sleep(1000);
+                    Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
         }
     }
 
-    private void displayPassword(){
+    private void displayPassword() {
         SetPassword frame1 = new SetPassword();
         frame1.setSize(300, 80);
         frame1.setLocation(500, 300);

@@ -1,5 +1,6 @@
 package app;
 
+import app.bean.ConnectionState;
 import app.runnable.HostUpdateRunnable;
 import app.service.ScreenService;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -16,8 +17,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.Connection;
 import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -46,11 +49,13 @@ public class ConnectionTest {
     @Ignore
     @Test
     public void testConnection() throws IOException {
-        int port = 4907;
+        ConnectionState state = ConnectionState.builder()
+                .port(4907)
+                .code("TEST")
+                .build();
+        new Thread(new HostUpdateRunnable(state)).start();
 
-        new Thread(new HostUpdateRunnable("TEST", port)).start();
-
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
+        try (ServerSocket serverSocket = new ServerSocket(state.getPort(), 50, InetAddress.getByName(state.getIp()))) {
             while (true) {
                 Socket socket = serverSocket.accept();
                 OutputStream out = socket.getOutputStream();

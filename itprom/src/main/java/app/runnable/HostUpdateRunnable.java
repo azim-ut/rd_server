@@ -1,6 +1,7 @@
 package app.runnable;
 
 import app.bean.ConnectionPath;
+import app.bean.ConnectionState;
 import com.google.gson.Gson;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -16,26 +17,23 @@ import java.io.InputStreamReader;
 import java.net.URL;
 
 public class HostUpdateRunnable implements Runnable {
-    private String code;
-    private int port;
+    private ConnectionState state;
     private Gson gson = new Gson();
 
-    public HostUpdateRunnable(String code, int port) {
-        this.code = code;
-        this.port = port;
+    public HostUpdateRunnable(ConnectionState state) {
+        this.state = state;
     }
 
     @Override
     public void run() {
-        String ip = null;
         int cnt = 20;
         int i = cnt;
         while (true) {
             try {
                 String newIp = getMyIp();
-                if (!newIp.equals(ip) || i-- < 0) {
-                    String res = postMyIp(newIp, port);
-                    ip = newIp;
+                if (!newIp.equals(state.getIp()) || i-- < 0) {
+                    String res = postMyIp(newIp, state.getPort());
+                    state.setIp(newIp);
                     i = cnt;
                 }
                 Thread.sleep(500);
@@ -56,7 +54,7 @@ public class HostUpdateRunnable implements Runnable {
 
         ConnectionPath data = ConnectionPath
                 .builder()
-                .code(code)
+                .code("TEST")
                 .port(port)
                 .ip(ip)
                 .build();
