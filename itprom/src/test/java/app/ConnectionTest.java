@@ -46,7 +46,6 @@ public class ConnectionTest {
         client = HttpClients.custom().setConnectionManager(poolingConnManager).build();
     }
 
-    @Ignore
     @Test
     public void testConnection() throws IOException {
         ConnectionState state = ConnectionState.builder()
@@ -54,7 +53,15 @@ public class ConnectionTest {
                 .code("TEST")
                 .build();
         new Thread(new HostUpdateRunnable(state)).start();
+        while(state.getIp() == null){
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 
+        InetAddress.getByName(state.getIp());
         try (ServerSocket serverSocket = new ServerSocket(state.getPort(), 50, InetAddress.getByName(state.getIp()))) {
             while (true) {
                 Socket socket = serverSocket.accept();

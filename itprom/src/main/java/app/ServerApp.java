@@ -26,34 +26,38 @@ import java.util.concurrent.TimeUnit;
 public class ServerApp {
     public void start(String[] args) {
         ConnectionState state = ConnectionState.builder()
-                .port(8084)
+                .port(4907)
                 .code("TEST")
                 .build();
         new Thread(new HostUpdateRunnable(state)).start();
-        while (true) {
-            if(state.getIp() != null){
-                try (ServerSocket serverSocket = new ServerSocket(state.getPort())) {
-                    System.out.println("Socket: " + serverSocket.toString());
-                    while (true) {
-                        try {
-                            Socket socket = serverSocket.accept();
-                            OutputStream out = socket.getOutputStream();
-                            PrintWriter writer = new PrintWriter(out, true);
-                            writer.println(state.getCode() + ": " + new Date().getTime());
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
+
+        while (state.getIp() == null) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        try (ServerSocket serverSocket = new ServerSocket(state.getPort())) {
+            System.out.println("Socket: " + serverSocket.toString());
+            while (true) {
                 try {
-                    Thread.sleep(5000);
+                    Socket socket = serverSocket.accept();
+                    OutputStream out = socket.getOutputStream();
+                    PrintWriter writer = new PrintWriter(out, true);
+                    writer.println(state.getCode() + ": " + new Date().getTime());
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
