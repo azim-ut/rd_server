@@ -26,13 +26,13 @@ import java.util.concurrent.TimeUnit;
 public class ServerApp {
     public void start(String[] args) {
         ConnectionState state = ConnectionState.builder()
-                .port(4907)
+                .port(8084)
                 .code("TEST")
                 .build();
         new Thread(new HostUpdateRunnable(state)).start();
         while (true) {
             if(state.getIp() != null){
-                try (ServerSocket serverSocket = new ServerSocket(state.getPort(), 50, InetAddress.getByName(state.getIp()))) {
+                try (ServerSocket serverSocket = new ServerSocket(state.getPort())) {
                     System.out.println("Socket: " + serverSocket.toString());
                     while (true) {
                         try {
