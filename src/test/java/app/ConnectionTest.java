@@ -42,8 +42,8 @@ public class ConnectionTest {
     @Test
     public void testConnection() throws IOException {
         ConnectionState state = ConnectionState.builder()
-                .port(4907)
-                .code("TEST")
+                .port(Constants.PORT)
+                .code(Constants.CODE)
                 .build();
         new Thread(new DefineHost(state)).start();
         while (state.getIp() == null) {

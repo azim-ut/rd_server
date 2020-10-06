@@ -33,7 +33,7 @@ public class SetPassword extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         value1 = text1.getText();
         dispose();
-        new InitConnection(Integer.parseInt(Constants.port), value1);
+        new InitConnection(Constants.PORT, value1);
     }
 
     public String getValue1() {
