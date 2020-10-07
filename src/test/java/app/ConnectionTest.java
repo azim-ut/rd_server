@@ -39,6 +39,7 @@ public class ConnectionTest {
         client = HttpClients.custom().setConnectionManager(poolingConnManager).build();
     }
 
+    @Ignore
     @Test
     public void testConnection() throws IOException {
         ConnectionState state = ConnectionState.builder()
