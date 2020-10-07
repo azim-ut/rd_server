@@ -41,10 +41,10 @@ public class ScreenProcessor implements Runnable {
                             }
                             ActionPacket packet = (ActionPacket) inStream.readObject();
                             if (packet.getCreateFile() != null) {
-                                saveFile(packet);
+//                                saveFile(packet);
                             }
                             if (packet.getRemoveFile() != null) {
-                                removeFile(packet);
+//                                removeFile(packet);
                             }
                             log.info("Received: " + packet.toString());
 
