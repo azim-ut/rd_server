@@ -2,6 +2,8 @@ package app.runnable;
 
 import app.bean.ActionPacket;
 import app.bean.ResponsePacket;
+import app.service.RedisScreenProvider;
+import app.service.ScreenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,10 +26,14 @@ public class ScreenProcessor implements Runnable {
 
     private ServerSocket serverSocket;
 
+    private ScreenProvider provider;
+
     @Override
     public void run() {
         ObjectInputStream inStream = null;
         ObjectOutputStream outStream = null;
+        provider = new RedisScreenProvider();
+        ActionPacket packet = null;
 
         try {
             defineServerSocket();
@@ -39,11 +45,12 @@ public class ScreenProcessor implements Runnable {
                             if (inStream == null) {
                                 inStream = new ObjectInputStream(socket.getInputStream());
                             }
-                            ActionPacket packet = (ActionPacket) inStream.readObject();
+                            packet = (ActionPacket) inStream.readObject();
                             if (packet.getCreateFile() != null) {
-//                                saveFile(packet);
+                                saveScreen(packet);
                             }
                             if (packet.getRemoveFile() != null) {
+                                removeScreen(packet);
 //                                removeFile(packet);
                             }
                             log.info("Received: " + packet.toString());
@@ -81,11 +88,22 @@ public class ScreenProcessor implements Runnable {
                 if (outStream != null) {
                     outStream.close();
                 }
+                if (packet != null) {
+                    provider.clear(packet.getCode() + "_");
+                }
                 serverSocket.close();
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
             }
         }
+    }
+
+    private void saveScreen(ActionPacket screenPacket) {
+        provider.put(screenPacket.getCode() + "_" + screenPacket.getPosition(), screenPacket.getBytes());
+    }
+
+    private void removeScreen(ActionPacket screenPacket) {
+        provider.remove(screenPacket.getCode() + "_" + screenPacket.getPosition());
     }
 
     private void saveFile(ActionPacket screenPacket) {
