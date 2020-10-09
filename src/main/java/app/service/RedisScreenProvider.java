@@ -37,7 +37,8 @@ public class RedisScreenProvider implements ScreenProvider {
     @Override
     public void put(String key, byte[] bytes) {
         RBinaryStream stream = client.getBinaryStream(key);
-        stream.set(bytes, 1L, TimeUnit.SECONDS);
+//        stream.set(bytes, 1L, TimeUnit.SECONDS);
+        stream.set(bytes);
     }
 
     @Override
