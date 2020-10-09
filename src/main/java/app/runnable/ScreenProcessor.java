@@ -41,7 +41,7 @@ public class ScreenProcessor implements Runnable {
             defineServerSocket();
             while (true) {
                 try (Socket socket = serverSocket.accept()) {
-                    outStream = new ObjectOutputStream(socket.getOutputStream());
+//                    outStream = new ObjectOutputStream(socket.getOutputStream());
                     while (true) {
                         if (socket.getInputStream().available() != 0) {
                             if (inStream == null) {
@@ -57,14 +57,14 @@ public class ScreenProcessor implements Runnable {
                             }
                             log.info("Received: " + packet.toString());
 
-                            ResponsePacket answer = ResponsePacket
-                                    .builder()
-                                    .msg("Ready")
-                                    .build();
-
-                            outStream.writeObject(answer);
-                            outStream.flush();
-                            log.info("Answer: " + answer.toString());
+//                            ResponsePacket answer = ResponsePacket
+//                                    .builder()
+//                                    .msg("Ready")
+//                                    .build();
+//
+//                            outStream.writeObject(answer);
+//                            outStream.flush();
+//                            log.info("Answer: " + answer.toString());
                         }
                     }
                 } catch (ClassNotFoundException e) {
@@ -87,9 +87,9 @@ public class ScreenProcessor implements Runnable {
                 if (inStream != null) {
                     inStream.close();
                 }
-                if (outStream != null) {
-                    outStream.close();
-                }
+//                if (outStream != null) {
+//                    outStream.close();
+//                }
                 if (packet != null) {
                     provider.clear(packet.getCode() + "_");
                 }
