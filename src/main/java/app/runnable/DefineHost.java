@@ -3,6 +3,7 @@ package app.runnable;
 import app.bean.ConnectionPath;
 import app.bean.ConnectionState;
 import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
@@ -16,9 +17,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 
+@Slf4j
 public class DefineHost implements Runnable {
-    private ConnectionState state;
-    private Gson gson = new Gson();
+    private final ConnectionState state;
+    private final Gson gson = new Gson();
 
     public DefineHost(ConnectionState state) {
         this.state = state;
@@ -26,20 +28,14 @@ public class DefineHost implements Runnable {
 
     @Override
     public void run() {
-        int cnt = 20;
-        int i = cnt;
-        while (true) {
-            try {
-                String newIp = getMyIp();
-                if (!newIp.equals(state.getIp()) || i-- < 0) {
-                    String res = postMyIp(newIp, state.getPort());
-                    state.setIp(newIp);
-                    i = cnt;
-                }
-                Thread.sleep(500);
-            } catch (IOException | InterruptedException ioException) {
-                ioException.printStackTrace();
-            }
+        try {
+            String newIp = getMyIp();
+            log.info("Server IP: " + newIp);
+            String res = postMyIp(newIp, state.getPort());
+            state.setIp(newIp);
+            log.info("IP info updated: " + res);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

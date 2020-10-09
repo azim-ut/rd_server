@@ -1,6 +1,8 @@
 package app.runnable;
 
+import app.Constants;
 import app.bean.ActionPacket;
+import app.bean.ConnectionState;
 import app.bean.ResponsePacket;
 import app.service.RedisScreenProvider;
 import app.service.ScreenProvider;
@@ -141,6 +143,13 @@ public class ScreenProcessor implements Runnable {
         }
         try {
             serverSocket = new ServerSocket(port);
+            new DefineHost(
+                    ConnectionState
+                            .builder()
+                            .port(Constants.PORT)
+                            .code(Constants.CODE)
+                            .build()
+            ).run();
         } catch (IOException e) {
             log.error("DefineSocket Exception. " + e.getMessage(), e);
         }
