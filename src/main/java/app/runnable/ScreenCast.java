@@ -7,6 +7,7 @@ import app.service.ServerSocketProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.ServerSocket;
@@ -29,21 +30,25 @@ public class ScreenCast implements Runnable {
         try {
             serverSocket = serverSocketProvider.get(HostAct.SHOW, code, port);
             while (true) {
-//                DataOutputStream outputStream = null;
-                OutputStream outputStream = null;
+                DataOutputStream outputStream = null;
+//                OutputStream outputStream = null;
                 try (Socket socket = serverSocket.accept()) {
 
                     while (true) {
                         List<String> screenKeys = provider.keys(code);
                         for (String key : screenKeys) {
                             try {
-                                if (outputStream == null) {
-                                    outputStream = socket.getOutputStream();
-                                }
+                                outputStream = new DataOutputStream(socket.getOutputStream());
                                 byte[] bytes = provider.get(key, 0);
-                                outputStream.write(bytes, 0, 10);
+                                log.info("Cast screen " + key + " bytes: " + bytes.length);
+                                outputStream.writeInt(bytes.length);
+                                for (int i = 0; i < bytes.length; i++) {
+                                    outputStream.write(bytes[i]);
+                                }
+                                outputStream.write('\n');
+                                log.info("Screen " + key + " sending");
                                 outputStream.flush();
-                                log.info("Cast screen bytes: " + bytes.length);
+                                log.info("Screen " + key + " sent");
                             } catch (IOException e) {
                                 log.error("Screen Cast StreamException: " + e.getMessage());
                             }
