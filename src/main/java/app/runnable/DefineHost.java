@@ -2,6 +2,7 @@ package app.runnable;
 
 import app.bean.ConnectionPath;
 import app.bean.ConnectionState;
+import app.constants.HostAct;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
@@ -31,7 +32,7 @@ public class DefineHost implements Runnable {
         try {
             String newIp = getMyIp();
             log.info("Server IP: " + newIp);
-            String res = postMyIp(newIp, state.getPort());
+            String res = postMyIp(state.getAct(), newIp, state.getPort());
             state.setIp(newIp);
             log.info("IP info updated: " + res);
         } catch (IOException e) {
@@ -45,14 +46,16 @@ public class DefineHost implements Runnable {
         return br.readLine();
     }
 
-    private String postMyIp(String ip, int port) throws IOException {
+    private String postMyIp(HostAct act, String ip, int port) throws IOException {
         HttpPost post = new HttpPost("https://it-prom.com/charts/rest/ip");
 
         ConnectionPath data = ConnectionPath
                 .builder()
                 .code("TEST")
+                .act(act)
                 .port(port)
-                .ip(ip)
+                .ip("127.0.0.1")
+//                .ip(ip)
                 .build();
         post.setEntity(new StringEntity(gson.toJson(data), ContentType.APPLICATION_FORM_URLENCODED));
 

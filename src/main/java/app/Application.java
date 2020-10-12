@@ -1,22 +1,25 @@
 package app;
 
+import app.constants.HostAct;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import picocli.CommandLine;
 
 
 public class Application {
 
-    @CommandLine.Option(names = {"-m", "--mode"}, defaultValue = "save", description = "'save': save screen, 'cast': cast screen by code")
-    private static String mode = "save";
-
     public static void main(String[] args) {
-        if (mode.equals("cast")) {
-            System.out.println("Cast");
-        } else {
-            ApplicationContext context = new AnnotationConfigApplicationContext(SaveScreenApp.class);
-            SaveScreenApp serverApp = context.getBean(SaveScreenApp.class);
-            serverApp.start(args);
+        if (args.length > 0) {
+            ApplicationContext context;
+            switch (HostAct.valueOf(args[0])) {
+                case SAVE:
+                    context = new AnnotationConfigApplicationContext(SaveScreenApp.class);
+                    context.getBean(SaveScreenApp.class).start(args);
+                    break;
+                case SHOW:
+                    context = new AnnotationConfigApplicationContext(CastScreenApp.class);
+                    context.getBean(CastScreenApp.class).start(args);
+                    break;
+            }
         }
     }
 }

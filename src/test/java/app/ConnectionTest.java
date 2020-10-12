@@ -43,7 +43,7 @@ public class ConnectionTest {
     @Test
     public void testConnection() throws IOException {
         ConnectionState state = ConnectionState.builder()
-                .port(Constants.PORT)
+                .port(Constants.PORT_READ)
                 .code(Constants.CODE)
                 .build();
         new Thread(new DefineHost(state)).start();

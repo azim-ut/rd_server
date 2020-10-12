@@ -1,15 +1,16 @@
 package app;
 
-import app.runnable.ScreenProcessor;
+import app.runnable.ScreenSaver;
 import org.springframework.stereotype.Component;
 
 /**
  * Hello world!
  */
 @Component
-public class SaveScreenApp {
+public class SaveScreenApp extends BaseScreenApp{
 
     public void start(String[] args) {
-        new Thread(new ScreenProcessor(Constants.PORT)).start();
+        init(args);
+        new Thread(new ScreenSaver(code, port)).start();
     }
 }
