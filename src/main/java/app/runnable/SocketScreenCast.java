@@ -1,22 +1,23 @@
 package app.runnable;
 
-import app.constants.HostAct;
+import app.constants.Mode;
 import app.service.RedisScreenProvider;
 import app.service.ScreenPacketProvider;
 import app.service.ServerSocketProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
-public class ScreenCast implements Runnable {
+public class SocketScreenCast implements Runnable {
 
     private final String code;
     private final Integer port;
@@ -28,35 +29,44 @@ public class ScreenCast implements Runnable {
         ServerSocket serverSocket = null;
 
         try {
-            serverSocket = serverSocketProvider.get(HostAct.SHOW, code, port);
+            serverSocket = serverSocketProvider.get(Mode.SHOW, code, port);
             while (true) {
                 DataOutputStream outputStream = null;
-//                OutputStream outputStream = null;
+                DataInputStream inputStream = null;
                 try (Socket socket = serverSocket.accept()) {
-
+                    inputStream = new DataInputStream(socket.getInputStream());
                     while (true) {
                         List<String> screenKeys = provider.keys(code);
+                        String response = null;
                         for (String key : screenKeys) {
                             try {
                                 outputStream = new DataOutputStream(socket.getOutputStream());
                                 byte[] bytes = provider.get(key, 0);
                                 log.info("Cast screen " + key + " bytes: " + bytes.length);
+                                outputStream.writeUTF(key);
                                 outputStream.writeInt(bytes.length);
-                                for (int i = 0; i < bytes.length; i++) {
-                                    outputStream.write(bytes[i]);
+                                outputStream.write(bytes);
+//                                outputStream.write('\n');
+
+                                while (response == null) {
+                                    if (inputStream.available() > 0) {
+                                        response = inputStream.readUTF();
+                                    }
                                 }
-                                outputStream.write('\n');
+
                                 log.info("Screen " + key + " sending");
                                 outputStream.flush();
                                 log.info("Screen " + key + " sent");
+                            } catch (SocketException e) {
+                                throw e;
                             } catch (IOException e) {
-                                log.error("Screen Cast StreamException: " + e.getMessage());
+                                log.error("Screen Cast IOException [code: " + key + "]: " + e.getMessage());
                             }
                         }
                     }
                 } catch (IOException e) {
                     log.error("Screen Cast SocketException: " + e.getMessage());
-                    serverSocket = serverSocketProvider.get(HostAct.SHOW, code, port);
+                    serverSocket = serverSocketProvider.get(Mode.SHOW, code, port);
                 }
             }
         } finally {

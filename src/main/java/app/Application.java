@@ -1,6 +1,6 @@
 package app;
 
-import app.constants.HostAct;
+import app.constants.Mode;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -10,7 +10,7 @@ public class Application {
     public static void main(String[] args) {
         if (args.length > 0) {
             ApplicationContext context;
-            switch (HostAct.valueOf(args[0])) {
+            switch (Mode.valueOf(args[0])) {
                 case SAVE:
                     context = new AnnotationConfigApplicationContext(SaveScreenApp.class);
                     context.getBean(SaveScreenApp.class).start(args);

@@ -2,7 +2,7 @@ package app.runnable;
 
 import app.bean.ConnectionPath;
 import app.bean.ConnectionState;
-import app.constants.HostAct;
+import app.constants.Mode;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
@@ -46,7 +46,7 @@ public class DefineHost implements Runnable {
         return br.readLine();
     }
 
-    private String postMyIp(HostAct act, String ip, int port) throws IOException {
+    private String postMyIp(Mode act, String ip, int port) throws IOException {
         HttpPost post = new HttpPost("https://it-prom.com/charts/rest/ip");
 
         ConnectionPath data = ConnectionPath

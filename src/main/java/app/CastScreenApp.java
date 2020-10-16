@@ -1,6 +1,7 @@
 package app;
 
-import app.runnable.ScreenCast;
+import app.runnable.SocketScreenCast;
+import app.runnable.WebSocketScreenCast;
 import org.springframework.stereotype.Component;
 
 /**
@@ -11,6 +12,7 @@ public class CastScreenApp extends BaseScreenApp {
 
     public void start(String[] args) {
         init(args);
-        new Thread(new ScreenCast(code, port)).start();
+//        new Thread(new SocketScreenCast(code, port)).start();
+        new Thread(new WebSocketScreenCast(code, port)).start();
     }
 }
