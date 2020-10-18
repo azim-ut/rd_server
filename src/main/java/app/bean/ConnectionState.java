@@ -1,6 +1,6 @@
 package app.bean;
 
-import app.constants.Mode;
+import app.constants.ServerMode;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ConnectionState {
-    private Mode act;
+    private ServerMode act;
     private String code;
     private String ip;
     private int port;

@@ -1,6 +1,7 @@
 package app.runnable;
 
-import app.constants.Mode;
+import app.bean.ScreenPacket;
+import app.constants.ServerMode;
 import app.service.RedisScreenProvider;
 import app.service.ScreenPacketProvider;
 import app.service.ServerSocketProvider;
@@ -29,23 +30,22 @@ public class SocketScreenCast implements Runnable {
         ServerSocket serverSocket = null;
 
         try {
-            serverSocket = serverSocketProvider.get(Mode.SHOW, code, port);
+            serverSocket = serverSocketProvider.get(ServerMode.SHOW, code, port);
             while (true) {
                 DataOutputStream outputStream = null;
                 DataInputStream inputStream = null;
                 try (Socket socket = serverSocket.accept()) {
                     inputStream = new DataInputStream(socket.getInputStream());
                     while (true) {
-                        List<String> screenKeys = provider.keys(code);
+                        List<ScreenPacket> screenPackets = provider.list(code);
                         String response = null;
-                        for (String key : screenKeys) {
+                        for (ScreenPacket screenPacket : screenPackets) {
                             try {
                                 outputStream = new DataOutputStream(socket.getOutputStream());
-                                byte[] bytes = provider.get(key, 0);
-                                log.info("Cast screen " + key + " bytes: " + bytes.length);
-                                outputStream.writeUTF(key);
-                                outputStream.writeInt(bytes.length);
-                                outputStream.write(bytes);
+                                log.info("Cast screen " + screenPacket.getId() + " bytes: " + screenPacket.getBytes().length);
+                                outputStream.writeUTF(screenPacket.getId());
+                                outputStream.writeInt(screenPacket.getBytes().length);
+                                outputStream.write(screenPacket.getBytes());
 //                                outputStream.write('\n');
 
                                 while (response == null) {
@@ -54,19 +54,19 @@ public class SocketScreenCast implements Runnable {
                                     }
                                 }
 
-                                log.info("Screen " + key + " sending");
+                                log.info("Screen " + screenPacket.getId() + " sending");
                                 outputStream.flush();
-                                log.info("Screen " + key + " sent");
+                                log.info("Screen " + screenPacket.getId() + " sent");
                             } catch (SocketException e) {
                                 throw e;
                             } catch (IOException e) {
-                                log.error("Screen Cast IOException [code: " + key + "]: " + e.getMessage());
+                                log.error("Screen Cast IOException [code: " + screenPacket.getId() + "]: " + e.getMessage());
                             }
                         }
                     }
                 } catch (IOException e) {
                     log.error("Screen Cast SocketException: " + e.getMessage());
-                    serverSocket = serverSocketProvider.get(Mode.SHOW, code, port);
+                    serverSocket = serverSocketProvider.get(ServerMode.SHOW, code, port);
                 }
             }
         } finally {

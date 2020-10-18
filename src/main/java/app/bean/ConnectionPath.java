@@ -1,11 +1,11 @@
 package app.bean;
 
-import app.constants.Mode;
+import app.constants.ServerMode;
 import lombok.Builder;
 
 @Builder
 public class ConnectionPath {
-    Mode act;
+    ServerMode act;
     String code;
     String ip;
     int port;

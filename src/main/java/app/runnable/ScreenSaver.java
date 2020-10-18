@@ -1,7 +1,7 @@
 package app.runnable;
 
 import app.bean.ScreenPacket;
-import app.constants.Mode;
+import app.constants.ServerMode;
 import app.service.RedisScreenProvider;
 import app.service.ScreenPacketProvider;
 import app.service.ServerSocketProvider;
@@ -37,7 +37,7 @@ public class ScreenSaver implements Runnable {
         ScreenPacket packet = null;
 
         try {
-            serverSocket = serverSocketProvider.get(Mode.SAVE, code, port);
+            serverSocket = serverSocketProvider.get(ServerMode.SAVE, code, port);
             while (true) {
                 try (Socket socket = serverSocket.accept()) {
                     while (true) {
@@ -59,7 +59,7 @@ public class ScreenSaver implements Runnable {
                     log.error("Class cast exception: " + e.getMessage(), e);
                 } catch (IOException ioException) {
                     log.error("SocketException: " + ioException.getMessage(), ioException);
-                    serverSocket = serverSocketProvider.get(Mode.SAVE, code, port);
+                    serverSocket = serverSocketProvider.get(ServerMode.SAVE, code, port);
                 } finally {
                     if (inStream != null) {
                         try {
@@ -91,7 +91,11 @@ public class ScreenSaver implements Runnable {
     }
 
     private void saveScreen(ScreenPacket screenPacket) {
-        provider.put(screenPacket.getCode(), screenPacket.getPosition(), screenPacket.getBytes());
+        try {
+            provider.put(screenPacket);
+        } catch (Exception exception) {
+            log.error("ScreenPacket save Exception: " + screenPacket.toString(), exception);
+        }
     }
 
     private void removeScreen(String code, int position) {
