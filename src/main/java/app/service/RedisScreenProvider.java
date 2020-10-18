@@ -68,7 +68,7 @@ public class RedisScreenProvider implements ScreenPacketProvider {
     @Override
     public void put(ScreenPacket screenPacket) {
         RBucket<RedisScreenPacket> bucket = client.getBucket(screenPacket.getId());
-        bucket.set(new RedisScreenPacket(screenPacket), 5L, TimeUnit.DAYS);
+        bucket.set(new RedisScreenPacket(screenPacket), 1L, TimeUnit.SECONDS);
         addToStoreAndGetKey(screenPacket);
     }
 
