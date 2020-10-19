@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -74,6 +73,9 @@ public class RedisScreenProvider implements ScreenPacketProvider {
 
     @Override
     public void remove(ScreenPacket screenPacket) {
+        if (screenPacket.getPosition() == 0) {
+            return;
+        }
         RBucket<RedisScreenPacket> bucket = client.getBucket(screenPacket.getId());
         if (bucket.isExists()) {
             bucket.delete();
