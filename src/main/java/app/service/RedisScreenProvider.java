@@ -44,7 +44,7 @@ public class RedisScreenProvider implements ScreenPacketProvider {
         }
         List<ScreenPacket> res = new ArrayList<>();
         for (String key : store.keys()) {
-            if(key.equals(code)){
+            if (key.equals(code)) {
                 continue;
             }
             RBucket<RedisScreenPacket> bucket = client.getBucket(key);
@@ -56,8 +56,7 @@ public class RedisScreenProvider implements ScreenPacketProvider {
     }
 
     @Override
-    public ScreenPacket get(String code, int position) {
-        String id = defineId(code, position);
+    public ScreenPacket get(String id) {
         RBucket<RedisScreenPacket> bucket = client.getBucket(id);
         if (bucket.isExists()) {
             return cast(bucket.get());
@@ -68,17 +67,18 @@ public class RedisScreenProvider implements ScreenPacketProvider {
     @Override
     public void put(ScreenPacket screenPacket) {
         RBucket<RedisScreenPacket> bucket = client.getBucket(screenPacket.getId());
-        bucket.set(new RedisScreenPacket(screenPacket), 1L, TimeUnit.SECONDS);
+//        bucket.set(new RedisScreenPacket(screenPacket), 1L, TimeUnit.SECONDS);
+        bucket.set(new RedisScreenPacket(screenPacket));
         addToStoreAndGetKey(screenPacket);
     }
 
     @Override
-    public void remove(String code, int position) {
-        RBucket<RedisScreenPacket> bucket = client.getBucket(defineId(code, position));
+    public void remove(ScreenPacket screenPacket) {
+        RBucket<RedisScreenPacket> bucket = client.getBucket(screenPacket.getId());
         if (bucket.isExists()) {
             bucket.delete();
         }
-        removeFromStoreAndGetKey(code, position);
+        removeFromStoreAndGetKey(screenPacket.getCode(), screenPacket.getPosition());
     }
 
     @Override
@@ -91,26 +91,18 @@ public class RedisScreenProvider implements ScreenPacketProvider {
 
     private String addToStoreAndGetKey(ScreenPacket screenPacket) {
         RBucket<Store> rStore = client.getBucket(screenPacket.getCode());
-        String key = defineId(screenPacket.getCode(), screenPacket.getPosition());
         Store store = rStore.get();
         if (store == null) {
             store = new Store();
         }
         store.add(screenPacket.getPosition(), screenPacket.getId());
         rStore.set(store);
-        return key;
+        return screenPacket.getId();
     }
 
     private ScreenPacket cast(RedisScreenPacket obj) {
         return ScreenPacket.builder()
                 .id(obj.getId())
-                .code(obj.getCode())
-                .position(obj.getPosition())
-                .epoch(obj.getEpoch())
-                .w(obj.getW())
-                .h(obj.getH())
-                .x(obj.getX())
-                .y(obj.getY())
                 .bytes(obj.getBytes())
                 .build();
     }
@@ -141,8 +133,8 @@ public class RedisScreenProvider implements ScreenPacketProvider {
             return res;
         }
 
-        public Store add(int position, String key) {
-            map.put(position, key);
+        public Store add(int position, String id) {
+            map.put(position, id);
             return this;
         }
 

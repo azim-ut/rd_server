@@ -51,11 +51,11 @@ public class DefineHost implements Runnable {
 
         ConnectionPath data = ConnectionPath
                 .builder()
-                .code("TEST")
+                .code(state.getCode())
                 .act(act)
                 .port(port)
-//                .ip("127.0.0.1")
-                .ip(ip)
+                .ip("127.0.0.1")
+//                .ip(ip)
                 .build();
         post.setEntity(new StringEntity(gson.toJson(data), ContentType.APPLICATION_FORM_URLENCODED));
 

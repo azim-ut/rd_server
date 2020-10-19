@@ -33,7 +33,7 @@ public class WebSocketScreenCast implements Runnable {
                 }
                 for (ScreenPacket row : screenKeys) {
                     log.info("Cast screen " + row.getId() + " bytes: " + row.getBytes().length);
-                    webSocket.broadcast(row.getCode() + ":" + row.getPosition() + ":" + row.getX() + ":" + row.getY() + ":" + row.getW() + ":" + row.getH());
+                    webSocket.broadcast(row.getId());
                     webSocket.broadcast(row.getBytes());
                     log.info("Screen " + row.getId() + " sent");
                 }
