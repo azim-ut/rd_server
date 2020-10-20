@@ -13,7 +13,7 @@ public class ShowScreenApp extends BaseScreenApp {
         init(args);
 //        new Thread(new SocketScreenCast(code, port)).start();
         try {
-            Runnable runnable = new WebSocketScreenCast(code, port);
+            Runnable runnable = new WebSocketScreenCast(port);
             Thread thread = new Thread(runnable, "WebSocketScreenCast");
             thread.start();
             thread.join();

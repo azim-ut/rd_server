@@ -161,7 +161,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <finalName>../Server</finalName>
+                            <finalName>../../RD/server/Server</finalName>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <transformers>
                                 <transformer

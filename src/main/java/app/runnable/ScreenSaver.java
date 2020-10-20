@@ -45,6 +45,11 @@ public class ScreenSaver implements Runnable {
                                 removeScreen(packet);
                             }
                             log.info("Received: " + packet.toString());
+                            try {
+                                Thread.sleep(20);
+                            } catch (InterruptedException e) {
+                                log.error(e.getMessage(), e);
+                            }
                         }
                     } finally {
                         try {

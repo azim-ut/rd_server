@@ -1,1 +1,0 @@
-java -cp Server.jar; app.Application
