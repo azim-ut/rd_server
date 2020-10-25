@@ -1,7 +1,7 @@
 package app.runnable;
 
 import app.bean.ScreenPacket;
-import app.constants.ServerMode;
+import app.bean.SocketState;
 import app.service.RedisScreenProvider;
 import app.service.ScreenPacketProvider;
 import app.service.ServerSocketProvider;
@@ -16,27 +16,32 @@ import java.net.Socket;
 
 @Slf4j
 @RequiredArgsConstructor
-public class ScreenSaver implements Runnable {
+public class SaveScreenRunnable implements Runnable {
 
-    private final String code;
-    private final Integer port;
+    private SocketState state;
 
     private ServerSocket serverSocket;
 
     private ScreenPacketProvider provider;
 
+    public SaveScreenRunnable(SocketState state) {
+        this.state = state;
+    }
+
     @Override
     public void run() {
         provider = new RedisScreenProvider();
         ServerSocketProvider serverSocketProvider = new ServerSocketProvider();
-        ScreenPacket packet = null;
 
         try {
-            serverSocket = serverSocketProvider.get(ServerMode.SAVE, code, port);
+            serverSocket = serverSocketProvider.get(state.getPort_save());
             while (true) {
-                try (Socket socket = serverSocket.accept()) {
-                    ObjectInputStream inStream = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
-                    try {
+                Socket socket = serverSocket.accept();
+                state.incBusySave();
+                new Thread(() -> {
+                    ScreenPacket packet = null;
+                    try (BufferedInputStream buff = new BufferedInputStream(socket.getInputStream());
+                         ObjectInputStream inStream = new ObjectInputStream(buff);) {
                         while (true) {
                             packet = (ScreenPacket) inStream.readObject();
                             if (packet.getBytes().length > 0) {
@@ -51,28 +56,19 @@ public class ScreenSaver implements Runnable {
                                 log.error(e.getMessage(), e);
                             }
                         }
-                    } finally {
-                        try {
-                            inStream.close();
-                        } catch (IOException e) {
-                            log.error(e.getMessage(), e);
-                        }
+                    } catch (ClassNotFoundException e) {
+                        log.error("Class cast exception: " + e.getMessage(), e);
+                    } catch (IOException e) {
+                        log.error("SocketException: " + e.getMessage());
+                        serverSocket = serverSocketProvider.get(state.getPort_save());
                     }
-                } catch (ClassNotFoundException e) {
-                    log.error("Class cast exception: " + e.getMessage(), e);
-                } catch (IOException e) {
-                    log.error("SocketException: " + e.getMessage());
-                    serverSocket = serverSocketProvider.get(ServerMode.SAVE, code, port);
-                }
+                }).start();
+                state.decBusySave();
             }
+        } catch (IOException ioException) {
+            log.error("ScreenSaverException IOException: " + ioException.getMessage());
         } finally {
             try {
-//                if (outStream != null) {
-//                    outStream.close();
-//                }
-                if (packet != null) {
-                    provider.clear(packet.getCode() + "_");
-                }
                 if (serverSocket != null) {
                     serverSocket.close();
                 }

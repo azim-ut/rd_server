@@ -2,6 +2,7 @@ package app.runnable;
 
 import app.ScreenCastServer;
 import app.bean.ScreenPacket;
+import app.bean.SocketState;
 import app.service.RedisScreenProvider;
 import app.service.ScreenPacketProvider;
 import lombok.RequiredArgsConstructor;
@@ -14,9 +15,13 @@ import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
-public class WebSocketScreenCast implements Runnable {
+public class ShowScreenRunnable implements Runnable {
 
-    private final Integer port;
+    private SocketState state;
+
+    public ShowScreenRunnable(SocketState state) {
+        this.state = state;
+    }
 
     public void run() {
         boolean enabled = true;
@@ -24,10 +29,12 @@ public class WebSocketScreenCast implements Runnable {
         ScreenCastServer webSocket = null;
 
         try {
-            webSocket = new ScreenCastServer(port);
+            webSocket = new ScreenCastServer(state.getPort_show());
             log.info("ScreenCastServer started on port: " + webSocket.getPort());
             webSocket.start();
             Map<Integer, Long> last = new HashMap<>();
+
+            state.incBusyShow();
             while (!webSocket.isClosed()) {
                 if (webSocket.isCodeRequested()) {
                     List<ScreenPacket> screenKeys = provider.list(webSocket.getCode());
@@ -56,10 +63,11 @@ public class WebSocketScreenCast implements Runnable {
                     }
                     webSocket.broadcast("DONE");
                     webSocket.dropCode();
-                }else{
+                } else {
                     Thread.sleep(100);
                 }
             }
+            state.decBusyShow();
 
         } catch (InterruptedException e) {
             log.info("InterruptedException. " + e.getMessage(), e);

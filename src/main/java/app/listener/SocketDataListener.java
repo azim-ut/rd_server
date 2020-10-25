@@ -1,10 +1,10 @@
 package app.listener;
 
-import app.bean.ConnectionState;
+import app.bean.SocketState;
 
 import java.net.ServerSocket;
 
 public interface SocketDataListener {
 
-    void process(ServerSocket socket, ConnectionState state);
+    void process(ServerSocket socket, SocketState state);
 }

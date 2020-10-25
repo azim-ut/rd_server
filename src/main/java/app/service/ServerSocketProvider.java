@@ -1,8 +1,6 @@
 package app.service;
 
-import app.bean.ConnectionState;
 import app.constants.ServerMode;
-import app.runnable.DefineHost;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +14,7 @@ import java.util.Map;
 public class ServerSocketProvider {
     private Map<Integer, ServerSocket> sockets = new HashMap<>();
 
-    public ServerSocket get(ServerMode act, String code, int port) {
+    public ServerSocket get(int port) {
         ServerSocket serverSocket = null;
         try {
             serverSocket = sockets.get(port);
@@ -29,21 +27,9 @@ public class ServerSocketProvider {
             }
             serverSocket = new ServerSocket(port);
             sockets.put(port, serverSocket);
-            pushHostData(act, code, port);
         } catch (IOException e) {
             log.error("DefineSocket Exception. " + e.getMessage(), e);
         }
         return serverSocket;
-    }
-
-    public void pushHostData(ServerMode hostType, String code, int port) {
-        new DefineHost(
-                ConnectionState
-                        .builder()
-                        .act(hostType)
-                        .port(port)
-                        .code(code)
-                        .build()
-        ).run();
     }
 }

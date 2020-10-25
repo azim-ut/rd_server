@@ -1,8 +1,7 @@
 package app.runnable;
 
 import app.bean.ConnectionPath;
-import app.bean.ConnectionState;
-import app.constants.ServerMode;
+import app.bean.SocketState;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
@@ -19,24 +18,35 @@ import java.io.InputStreamReader;
 import java.net.URL;
 
 @Slf4j
-public class DefineHost implements Runnable {
-    private final ConnectionState state;
+public class UpdateSocketRunnable implements Runnable {
+    private final SocketState state;
     private final Gson gson = new Gson();
 
-    public DefineHost(ConnectionState state) {
+    public UpdateSocketRunnable(SocketState state) {
         this.state = state;
     }
 
     @Override
     public void run() {
         try {
-            String newIp = getMyIp();
-            log.info("Server IP: " + newIp);
-            String res = postMyIp(state.getAct(), newIp, state.getPort());
-            state.setIp(newIp);
-            log.info("IP info updated: " + res);
-        } catch (IOException e) {
-            e.printStackTrace();
+            SocketState lastState = null;
+            while (true) {
+                try {
+                    if (!state.equals(lastState)) {
+                        lastState = state;
+                        String newIp = getMyIp();
+                        log.info("Server IP: " + newIp);
+                        state.setIp(newIp);
+                        String res = postMySocket(state);
+                        log.info("IP info updated: " + res);
+                    }
+                    Thread.sleep(100);
+                } catch (IOException e) {
+                    log.error("UpdateSocketRunnable IOException: " + e.getMessage());
+                }
+            }
+        } catch (InterruptedException e) {
+            log.error("UpdateSocketRunnable interrupted");
         }
     }
 
@@ -46,16 +56,17 @@ public class DefineHost implements Runnable {
         return br.readLine();
     }
 
-    private String postMyIp(ServerMode act, String ip, int port) throws IOException {
-        HttpPost post = new HttpPost("https://it-prom.com/charts/rest/ip");
+    private String postMySocket(SocketState state) throws IOException {
+        HttpPost post = new HttpPost("https://it-prom.com/charts/rest/socket");
 
         ConnectionPath data = ConnectionPath
                 .builder()
-                .code(state.getCode())
-                .act(act)
-                .port(port)
+                .port_save(state.getPort_save())
+                .port_show(state.getPort_show())
+                .busy_save(state.getBusy_save())
+                .busy_show(state.getBusy_show())
 //                .ip("127.0.0.1")
-                .ip(ip)
+                .ip(state.getIp())
                 .build();
         post.setEntity(new StringEntity(gson.toJson(data), ContentType.APPLICATION_FORM_URLENCODED));
 

@@ -8,5 +8,8 @@ public class ConnectionPath {
     ServerMode act;
     String code;
     String ip;
-    int port;
+    int port_save;
+    int port_show;
+    int busy_save;
+    int busy_show;
 }
