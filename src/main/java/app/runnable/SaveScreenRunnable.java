@@ -20,8 +20,6 @@ public class SaveScreenRunnable implements Runnable {
 
     private SocketState state;
 
-    private ServerSocket serverSocket;
-
     private ScreenPacketProvider provider;
 
     public SaveScreenRunnable(SocketState state) {
@@ -33,8 +31,8 @@ public class SaveScreenRunnable implements Runnable {
         provider = new RedisScreenProvider();
         ServerSocketProvider serverSocketProvider = new ServerSocketProvider();
 
-        try {
-            serverSocket = serverSocketProvider.get(state.getPort_save());
+
+        try (ServerSocket serverSocket = serverSocketProvider.get(state.getPort_save())){
             while (true) {
                 Socket socket = serverSocket.accept();
                 state.incBusySave();
@@ -49,6 +47,7 @@ public class SaveScreenRunnable implements Runnable {
                             } else {
                                 removeScreen(packet);
                             }
+
                             log.info("Received: " + packet.toString());
                             try {
                                 Thread.sleep(20);
@@ -60,21 +59,12 @@ public class SaveScreenRunnable implements Runnable {
                         log.error("Class cast exception: " + e.getMessage(), e);
                     } catch (IOException e) {
                         log.error("SocketException: " + e.getMessage());
-                        serverSocket = serverSocketProvider.get(state.getPort_save());
                     }
                 }).start();
                 state.decBusySave();
             }
         } catch (IOException ioException) {
             log.error("ScreenSaverException IOException: " + ioException.getMessage());
-        } finally {
-            try {
-                if (serverSocket != null) {
-                    serverSocket.close();
-                }
-            } catch (IOException e) {
-                log.error(e.getMessage(), e);
-            }
         }
     }
 

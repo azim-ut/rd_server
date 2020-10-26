@@ -28,26 +28,25 @@ public class UpdateSocketRunnable implements Runnable {
 
     @Override
     public void run() {
-        try {
-            SocketState lastState = null;
-            while (true) {
-                try {
-                    if (!state.equals(lastState)) {
-                        lastState = state;
-                        String newIp = getMyIp();
-                        log.info("Server IP: " + newIp);
-                        state.setIp(newIp);
-                        String res = postMySocket(state);
-                        log.info("IP info updated: " + res);
-                    }
-                    Thread.sleep(100);
-                } catch (IOException e) {
-                    log.error("UpdateSocketRunnable IOException: " + e.getMessage());
+        SocketState lastState = null;
+        while (true) {
+            try {
+                if (!state.equals(lastState)) {
+                    lastState = state;
+                    String newIp = getMyIp();
+                    log.info("Server IP: " + newIp);
+                    state.setIp(newIp);
+                    String res = postMySocket(state);
+                    log.info("IP info updated: " + res);
                 }
+                Thread.sleep(100);
+            } catch (IOException e) {
+                log.error("UpdateSocketRunnable IOException: " + e.getMessage());
+            } catch (InterruptedException e) {
+                log.error("UpdateSocketRunnable interrupted");
             }
-        } catch (InterruptedException e) {
-            log.error("UpdateSocketRunnable interrupted");
         }
+
     }
 
     private String getMyIp() throws IOException {
@@ -65,8 +64,8 @@ public class UpdateSocketRunnable implements Runnable {
                 .port_show(state.getPort_show())
                 .busy_save(state.getBusy_save())
                 .busy_show(state.getBusy_show())
-//                .ip("127.0.0.1")
-                .ip(state.getIp())
+                .ip("127.0.0.1")
+//                .ip(state.getIp())
                 .build();
         post.setEntity(new StringEntity(gson.toJson(data), ContentType.APPLICATION_FORM_URLENCODED));
 

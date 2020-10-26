@@ -32,7 +32,7 @@ public class ShowScreenRunnable implements Runnable {
             webSocket = new ScreenCastServer(state.getPort_show());
             log.info("ScreenCastServer started on port: " + webSocket.getPort());
             webSocket.start();
-            Map<Integer, Long> last = new HashMap<>();
+            Map<String, Long> last = new HashMap<>();
 
             state.incBusyShow();
             while (!webSocket.isClosed()) {
@@ -42,7 +42,7 @@ public class ShowScreenRunnable implements Runnable {
                     boolean same = true;
                     try {
                         for (ScreenPacket row : screenKeys) {
-                            if (!last.containsKey(row.getPosition()) || last.get(row.getPosition()) != row.getBytes().length) {
+                            if (!last.containsKey(row.getId()) || last.get(row.getId()) != row.getBytes().length) {
                                 same = false;
                                 break;
                             }
@@ -54,7 +54,7 @@ public class ShowScreenRunnable implements Runnable {
                     if (!same) {
                         last = new HashMap<>(screenKeys.size());
                         for (ScreenPacket row : screenKeys) {
-                            last.put(row.getPosition(), (long) row.getBytes().length);
+                            last.put(row.getId(), (long) row.getBytes().length);
                             log.info("Cast screen " + row.getId() + " bytes: " + row.getBytes().length);
                             webSocket.broadcast(row.getId());
                             webSocket.broadcast(row.getBytes());
