@@ -64,8 +64,8 @@ public class UpdateSocketRunnable implements Runnable {
                 .port_show(state.getPort_show())
                 .busy_save(state.getBusy_save())
                 .busy_show(state.getBusy_show())
-                .ip("127.0.0.1")
-//                .ip(state.getIp())
+//                .ip("127.0.0.1")
+                .ip(state.getIp())
                 .build();
         post.setEntity(new StringEntity(gson.toJson(data), ContentType.APPLICATION_FORM_URLENCODED));
 
