@@ -1,19 +1,24 @@
 package app;
 
 import app.bean.SocketState;
+import app.service.ServerSocketProvider;
 import org.springframework.stereotype.Component;
 
 /**
  * Hello world!
  */
 @Component
-public class ServerApp extends BaseScreenApp {
+public class ServerApp {
     private SocketState state;
     private ScreenSaveService screenSaveService;
+
+    private ServerSocketProvider serverSocketProvider;
 
     public void start(String[] args) {
 
         try {
+            serverSocketProvider = new ServerSocketProvider();
+
             state = SocketState
                     .builder()
                     .port_save(Integer.parseInt(args[0]))

@@ -7,6 +7,7 @@ import app.service.ScreenPacketProvider;
 import app.service.ServerSocketProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -20,51 +21,54 @@ public class SaveScreenRunnable implements Runnable {
 
     private SocketState state;
 
-    private ScreenPacketProvider provider;
+    private final ScreenPacketProvider provider;
+
+    @Autowired
+    private ServerSocketProvider serverSocketProvider;
 
     public SaveScreenRunnable(SocketState state) {
+        provider = new RedisScreenProvider();
+        serverSocketProvider = new ServerSocketProvider();
         this.state = state;
     }
 
     @Override
     public void run() {
-        provider = new RedisScreenProvider();
-        ServerSocketProvider serverSocketProvider = new ServerSocketProvider();
 
-
-        try (ServerSocket serverSocket = serverSocketProvider.get(state.getPort_save())){
-            while (true) {
+        while (true) {
+            try (ServerSocket serverSocket = serverSocketProvider.get(state.getPort_save())) {
+                log.info("SAVE SOCKET READY to accept connections. IP:{}, port:{}", state.getIp(), state.getPort_save());
                 Socket socket = serverSocket.accept();
                 state.incBusySave();
-                new Thread(() -> {
-                    ScreenPacket packet = null;
-                    try (BufferedInputStream buff = new BufferedInputStream(socket.getInputStream());
-                         ObjectInputStream inStream = new ObjectInputStream(buff);) {
-                        while (true) {
-                            packet = (ScreenPacket) inStream.readObject();
-                            if (packet.getBytes().length > 0) {
-                                saveScreen(packet);
-                            } else {
-                                removeScreen(packet);
-                            }
-
-                            log.info("Received: " + packet.toString());
-                            try {
-                                Thread.sleep(20);
-                            } catch (InterruptedException e) {
-                                log.error(e.getMessage(), e);
-                            }
+                ScreenPacket packet = null;
+                try (
+                        BufferedInputStream buff = new BufferedInputStream(socket.getInputStream());
+                        ObjectInputStream inStream = new ObjectInputStream(buff);
+                ) {
+                    while (true) {
+                        packet = (ScreenPacket) inStream.readObject();
+                        if (packet.getBytes().length > 0) {
+                            saveScreen(packet);
+                        } else {
+                            removeScreen(packet);
                         }
-                    } catch (ClassNotFoundException e) {
-                        log.error("Class cast exception: " + e.getMessage(), e);
-                    } catch (IOException e) {
-                        log.error("SocketException: " + e.getMessage());
+
+//                        log.info("Received: " + packet.toString());
+                        try {
+                            Thread.sleep(20);
+                        } catch (InterruptedException e) {
+                            log.error("SaveScreenRunnable interrupted on screen receiving. {}", e.getMessage());
+                        }
                     }
-                }).start();
+                } catch (ClassNotFoundException e) {
+                    log.error("Class cast exception: " + e.getMessage(), e);
+                } catch (IOException e) {
+                    log.error("SAVE SOCKET CLOSED. Socket: IP:{}, port:{}", state.getIp(), state.getPort_save());
+                }
                 state.decBusySave();
+            } catch (IOException ioException) {
+                log.error("ScreenSaverException IOException: " + ioException.getMessage());
             }
-        } catch (IOException ioException) {
-            log.error("ScreenSaverException IOException: " + ioException.getMessage());
         }
     }
 

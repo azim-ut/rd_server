@@ -25,7 +25,7 @@ public class ScreenSaveService {
             try {
                 startSaveScreenThread();
                 startScreenGetThread();
-                startImageSendThread();
+                startUpdateSocketThread();
                 while (true) {
                     Thread.sleep(100);
                 }
@@ -75,7 +75,7 @@ public class ScreenSaveService {
         showScreenThread.start();
     }
 
-    private void startImageSendThread() {
+    private void startUpdateSocketThread() {
         updateSocketThread = new UpdateSocketThread(state);
         updateSocketThread.start();
     }

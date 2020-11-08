@@ -28,18 +28,13 @@ public class UpdateSocketRunnable implements Runnable {
 
     @Override
     public void run() {
-        SocketState lastState = null;
         while (true) {
             try {
-                if (!state.equals(lastState)) {
-                    lastState = state;
-                    String newIp = getMyIp();
-                    log.info("Server IP: " + newIp);
-                    state.setIp(newIp);
-                    String res = postMySocket(state);
-                    log.info("IP info updated: " + res);
-                }
-                Thread.sleep(100);
+                String newIp = getMyIp();
+                state.setIp(newIp);
+                String res = postMySocket(state);
+                log.debug("IP info updated: " + res);
+                Thread.sleep(5000);
             } catch (IOException e) {
                 log.error("UpdateSocketRunnable IOException: " + e.getMessage());
             } catch (InterruptedException e) {
@@ -64,7 +59,6 @@ public class UpdateSocketRunnable implements Runnable {
                 .port_show(state.getPort_show())
                 .busy_save(state.getBusy_save())
                 .busy_show(state.getBusy_show())
-//                .ip("127.0.0.1")
                 .ip(state.getIp())
                 .build();
         post.setEntity(new StringEntity(gson.toJson(data), ContentType.APPLICATION_FORM_URLENCODED));

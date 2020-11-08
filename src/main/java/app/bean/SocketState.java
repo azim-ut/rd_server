@@ -1,5 +1,6 @@
 package app.bean;
 
+import app.service.ScreenPacketProvider;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,6 +16,12 @@ public class SocketState {
     private int port_show;
     private int busy_save;
     private int busy_show;
+    private ScreenPacketProvider provider;
+
+    public String getIp() {
+//        return ip;
+        return "127.0.0.1";
+    }
 
     public synchronized void setIp(String val) {
         this.ip = val;
