@@ -26,7 +26,7 @@ public class RedisScreenProvider implements ScreenPacketProvider {
 
     public RedisScreenProvider() {
         try {
-            InputStream is = RedissonClient.class.getClassLoader().getResourceAsStream("resisson.yaml");
+            InputStream is = RedissonClient.class.getClassLoader().getResourceAsStream("redisson.yaml");
             Config config = Config.fromYAML(is);
             client = Redisson.create(config);
         } catch (IOException e) {
@@ -89,6 +89,8 @@ public class RedisScreenProvider implements ScreenPacketProvider {
         for (String key : keys.getKeysByPattern(code)) {
             client.getBinaryStream(key).deleteAsync();
         }
+        RBucket<Store> rStore = client.getBucket(code);
+        rStore.delete();
     }
 
     private String addToStoreAndGetKey(ScreenPacket screenPacket) {

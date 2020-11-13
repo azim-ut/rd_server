@@ -49,13 +49,15 @@ public class SaveScreenRunnable implements Runnable {
                         packet = (ScreenPacket) inStream.readObject();
                         if (packet.getBytes().length > 0) {
                             saveScreen(packet);
+                        } else if (packet.getCommand() != null && packet.getCommand().equals("ONLY_BG")) {
+                            leaveOnlyBg(packet);
                         } else {
                             removeScreen(packet);
                         }
 
 //                        log.info("Received: " + packet.toString());
                         try {
-                            Thread.sleep(20);
+                            Thread.sleep(10);
                         } catch (InterruptedException e) {
                             log.error("SaveScreenRunnable interrupted on screen receiving. {}", e.getMessage());
                         }
@@ -82,5 +84,9 @@ public class SaveScreenRunnable implements Runnable {
 
     private void removeScreen(ScreenPacket screenPacket) {
         provider.remove(screenPacket);
+    }
+
+    private void leaveOnlyBg(ScreenPacket screenPacket) {
+        provider.clear(screenPacket.getCode());
     }
 }

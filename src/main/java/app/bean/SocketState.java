@@ -19,8 +19,8 @@ public class SocketState {
     private ScreenPacketProvider provider;
 
     public String getIp() {
-//        return ip;
-        return "127.0.0.1";
+        return ip;
+//        return "127.0.0.1";
     }
 
     public synchronized void setIp(String val) {
