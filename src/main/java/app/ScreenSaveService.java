@@ -27,7 +27,7 @@ public class ScreenSaveService {
                 startScreenGetThread();
                 startUpdateSocketThread();
                 while (true) {
-                    Thread.sleep(10);
+                    Thread.sleep(50);
                 }
             } catch (InterruptedException e) {
                 log.error("ScreenSaveService monitor: " + e.getMessage());

@@ -55,9 +55,9 @@ public class SaveScreenRunnable implements Runnable {
                             removeScreen(packet);
                         }
 
-//                        log.info("Received: " + packet.toString());
+                        log.info("Received: " + packet.toString());
                         try {
-                            Thread.sleep(10);
+                            Thread.sleep(50);
                         } catch (InterruptedException e) {
                             log.error("SaveScreenRunnable interrupted on screen receiving. {}", e.getMessage());
                         }

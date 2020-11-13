@@ -63,7 +63,7 @@ public class ShowScreenRunnable implements Runnable {
                     outStream = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 
                     while (true) {
-                        Thread.sleep(10);
+                        Thread.sleep(50);
                         List<ScreenPacket> screenKeys = provider.list(code);
 
                         boolean same = true;
@@ -89,7 +89,7 @@ public class ShowScreenRunnable implements Runnable {
                         }else{
                             outStream.writeObject(ScreenPacket.builder().build());
                             outStream.flush();
-                            Thread.sleep(10);
+                            Thread.sleep(50);
                             i++;
                         }
                     }
@@ -143,7 +143,7 @@ public class ShowScreenRunnable implements Runnable {
                     webSocket.broadcast("DONE");
                     webSocket.dropCode();
                 } else {
-                    Thread.sleep(10);
+                    Thread.sleep(50);
                 }
             }
             state.decBusyShow();
