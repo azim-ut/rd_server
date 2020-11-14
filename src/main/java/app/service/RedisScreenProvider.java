@@ -127,7 +127,7 @@ public class RedisScreenProvider implements ScreenPacketProvider {
 
     static class Store {
         public Map<Integer, String> map = new TreeMap<>();
-        public Long epoch;
+        public Long frame;
 
         public List<String> keys() {
             List<String> res = new ArrayList<>();
@@ -153,12 +153,12 @@ public class RedisScreenProvider implements ScreenPacketProvider {
             if (o == null || getClass() != o.getClass()) return false;
             Store store = (Store) o;
             return Objects.equals(map, store.map) &&
-                    Objects.equals(epoch, store.epoch);
+                    Objects.equals(frame, store.frame);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(map, epoch);
+            return Objects.hash(map, frame);
         }
     }
 }

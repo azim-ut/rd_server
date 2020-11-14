@@ -77,11 +77,11 @@ public class ShowScreenRunnable implements Runnable {
                         } catch (IndexOutOfBoundsException e) {
                             same = false;
                         }
-                        if (!same || i>10) {
+                        if (!same) {
                             last = new HashMap<>(screenKeys.size());
                             for (ScreenPacket row : screenKeys) {
                                 last.put(row.getId(), (long) row.getBytes().length);
-                                log.info("Cast screen " + row.getId() + " bytes: " + row.getBytes().length);
+//                                log.info("Cast screen " + row.getId() + " bytes: " + row.getBytes().length);
                                 outStream.writeObject(row);
                                 outStream.flush();
                             }
@@ -89,7 +89,7 @@ public class ShowScreenRunnable implements Runnable {
                         }else{
                             outStream.writeObject(ScreenPacket.builder().build());
                             outStream.flush();
-                            Thread.sleep(50);
+                            Thread.sleep(500);
                             i++;
                         }
                     }
@@ -134,10 +134,10 @@ public class ShowScreenRunnable implements Runnable {
                         last = new HashMap<>(screenKeys.size());
                         for (ScreenPacket row : screenKeys) {
                             last.put(row.getId(), (long) row.getBytes().length);
-                            log.info("Cast screen " + row.getId() + " bytes: " + row.getBytes().length);
+//                            log.info("Cast screen " + row.getId() + " bytes: " + row.getBytes().length);
                             webSocket.broadcast(row.getId());
                             webSocket.broadcast(row.getBytes());
-                            log.info("Screen " + row.getId() + " sent");
+//                            log.info("Screen " + row.getId() + " sent");
                         }
                     }
                     webSocket.broadcast("DONE");

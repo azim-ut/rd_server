@@ -34,19 +34,28 @@ public class SaveScreenRunnable implements Runnable {
 
     @Override
     public void run() {
-
+        int lastFrame = -1;
         while (true) {
             try (ServerSocket serverSocket = serverSocketProvider.get(state.getPort_save())) {
                 log.info("SAVE SOCKET READY to accept connections. IP:{}, port:{}", state.getIp(), state.getPort_save());
                 Socket socket = serverSocket.accept();
                 state.incBusySave();
                 ScreenPacket packet = null;
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    log.error("SaveScreenRunnable interrupted on screen receiving. {}", e.getMessage());
+                }
                 try (
                         BufferedInputStream buff = new BufferedInputStream(socket.getInputStream());
                         ObjectInputStream inStream = new ObjectInputStream(buff);
                 ) {
                     while (true) {
                         packet = (ScreenPacket) inStream.readObject();
+                        if(lastFrame < packet.getFrame()){
+                            provider.remove(packet);
+                            lastFrame = packet.getFrame();
+                        }
                         if (packet.getBytes().length > 0) {
                             saveScreen(packet);
                         } else if (packet.getCommand() != null && packet.getCommand().equals("ONLY_BG")) {
@@ -69,6 +78,7 @@ public class SaveScreenRunnable implements Runnable {
                 }
                 state.decBusySave();
             } catch (IOException ioException) {
+
                 log.error("ScreenSaverException IOException: " + ioException.getMessage());
             }
         }
